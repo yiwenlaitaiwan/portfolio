@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Winnie Lai – Event Portfolio</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700;800&family=Manrope:wght@400;500;600&family=Space+Mono:wght@400;700&family=Noto+Sans+TC:wght@400;700&display=swap">
+<style>
+/* VOICE: the same quiet, confident event-showcase voice as the Slides deck and ANON.
+   IDEA: a presenter's deck that lives on the web: one slide per event, photos you scroll through like a stack of prints.
+   PICTURE: each event's photo stack, large, on the left; the wheel moves through it.
+   COLOUR and TYPE: BMOG Dryad green fields, Apollo gold accent, mist text; Sora headings, Manrope body, Space Mono labels (as ANON).
+   LAYOUT: 1920x1080 stage scaled to the window; below 760px the slides stack as one scrolling page. */
+:root{--bg:#174926;--cover:#11371d;--card:#0c2513;--text:#fff8f2;--soft:#dce4de;--muted:#a2b6a8;--accent:#deb970;--rule:rgba(255,248,242,.14);color-scheme:dark}
+*{box-sizing:border-box;min-width:0}
+html,body{margin:0;height:100%;background:#0c2513;color:var(--text);font-family:Manrope,'Noto Sans TC',system-ui,sans-serif}
+body{overflow:hidden}
+.mono{font-family:'Space Mono','Noto Sans TC',ui-monospace,monospace}
+#viewport{position:fixed;inset:0;overflow:hidden}
+#stage{position:absolute;left:50%;top:calc(50% - 30px);width:1920px;height:1080px;transform-origin:center center}
+.slide{position:absolute;inset:0;opacity:0;visibility:hidden;transition:opacity .45s ease,visibility 0s linear .45s;background:var(--bg)}
+.slide.on{opacity:1;visibility:visible;transition:opacity .45s ease}
+.foot{position:absolute;left:120px;right:120px;bottom:40px;display:flex;justify-content:space-between;font-size:24px;letter-spacing:3px;color:var(--muted)}
+.foot b{color:var(--accent);font-weight:400}
+/* cover */
+.cover{background:var(--cover);padding:120px;display:flex;flex-direction:column;justify-content:center}
+.cover .kicker{font-size:24px;letter-spacing:5px;color:var(--accent);margin:0 0 44px}
+.cover h1{font-family:Sora,'Noto Sans TC',sans-serif;font-weight:800;font-size:240px;line-height:.9;letter-spacing:-12px;margin:0}
+.cover h1 span{color:var(--accent)}
+.cover .lede{font-family:Sora,'Noto Sans TC',sans-serif;font-weight:600;font-size:50px;line-height:1.2;letter-spacing:-1px;margin:52px 0 0;max-width:1500px}
+.cover .hint{font-size:22px;letter-spacing:3px;color:var(--muted);margin-top:64px}
+/* event */
+.ev{display:grid;grid-template-columns:795px 795px;gap:90px;padding:96px 120px 120px;align-items:center}
+.media{position:relative;height:100%;max-height:800px;align-self:center;display:flex;flex-direction:column}
+.stack{position:relative;flex:1;outline:none}
+.stack:focus-visible{box-shadow:0 0 0 3px var(--accent);border-radius:16px}
+.item{position:absolute;left:0;right:0;top:0;bottom:0;border-radius:14px;overflow:hidden;background:var(--card);transition:transform .55s cubic-bezier(.2,.7,.2,1),opacity .55s ease;will-change:transform,opacity}
+.item img,.item video{width:100%;height:100%;object-fit:cover;display:block}
+.item.cur{transform:none;opacity:1;z-index:3}
+.item.next{transform:translateY(46px) scale(.92);opacity:.5;z-index:2}
+.item.prev{transform:translateY(-70px) scale(.94);opacity:0;z-index:1}
+.item.hide{transform:translateY(70px) scale(.88);opacity:0;z-index:0}
+.item .tag{position:absolute;left:18px;top:18px;background:rgba(12,37,19,.78);color:var(--text);font-size:18px;letter-spacing:2px;padding:6px 14px;border-radius:999px}
+.ctrl{display:flex;align-items:center;gap:18px;margin-top:70px}
+.ctrl button{width:52px;height:52px;border-radius:50%;border:1px solid rgba(255,248,242,.35);background:transparent;color:var(--text);font-size:22px;cursor:pointer}
+.ctrl button:hover{border-color:var(--accent);color:var(--accent)}
+.ctrl button:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.dots{display:flex;gap:10px;align-items:center}
+.dots i{width:10px;height:10px;border-radius:3px;background:rgba(255,248,242,.25);transition:all .3s}
+.dots i.on{width:34px;background:var(--accent)}
+.count{margin-left:auto;font-size:22px;letter-spacing:3px;color:var(--muted);white-space:nowrap}
+.info{display:flex;flex-direction:column}
+.info .kicker{font-size:22px;letter-spacing:3px;color:var(--accent);margin:0 0 26px}
+.badge{align-self:flex-start;font-size:20px;font-weight:700;letter-spacing:2px;border:1px solid rgba(255,248,242,.35);background:rgba(255,248,242,.06);border-radius:999px;padding:4px 18px}
+.info h2{font-family:Sora,'Noto Sans TC',sans-serif;font-weight:700;font-size:64px;line-height:1.02;letter-spacing:-2px;margin:22px 0 8px;white-space:pre-line}
+.at{font-size:22px;letter-spacing:1px;color:var(--accent);margin:0 0 30px}
+.meta{font-size:20px;letter-spacing:2px;color:var(--muted);margin:0 0 30px}
+.desc{font-size:26px;line-height:1.55;color:var(--soft);max-width:680px;margin:0 0 36px}
+.stats{display:flex;flex-wrap:wrap;gap:28px 48px;border-top:1px solid var(--rule);padding-top:30px}
+.stat{width:210px}
+.stat.wide{width:100%}
+.num{font-family:Sora,'Noto Sans TC',sans-serif;font-weight:800;font-size:46px;line-height:1;letter-spacing:-1px;white-space:nowrap}
+.num span{color:var(--accent)}
+.lab{font-size:18px;letter-spacing:2px;line-height:1.3;color:var(--muted);margin-top:8px}
+.partners{font-family:Sora,'Noto Sans TC',sans-serif;font-weight:600;font-size:24px;margin-top:8px}
+.xlink{font-size:22px;letter-spacing:2px;color:var(--accent);margin-top:30px;text-decoration:none;align-self:flex-start}
+.xlink:hover{text-decoration:underline}
+/* nav */
+#nav{position:fixed;left:50%;bottom:16px;transform:translateX(-50%);display:flex;align-items:center;gap:6px;background:rgba(12,37,19,.86);border:1px solid var(--rule);border-radius:999px;padding:6px;z-index:10}
+#nav button{min-width:44px;height:44px;border:0;border-radius:999px;background:transparent;color:var(--text);font:16px 'Space Mono',monospace;cursor:pointer;padding:0 12px}
+#nav button:hover{background:rgba(255,248,242,.08)}
+#nav button:focus-visible{outline:2px solid var(--accent)}
+#pos{font:15px 'Space Mono',monospace;letter-spacing:2px;color:var(--muted);padding:0 8px}
+/* narrow: one scrolling page */
+@media (max-width:760px){
+ body{overflow:auto}
+ #viewport{position:static;display:block}
+ #stage{width:auto;height:auto;transform:none!important}
+ .slide{position:relative;opacity:1;visibility:visible;padding:40px 20px 56px!important;display:block}
+ #stage{position:static}
+ .cover{min-height:70vh;display:flex}
+ .cover h1{font-size:72px;letter-spacing:-3px}.cover .lede{font-size:22px;margin-top:24px}.cover .kicker{font-size:13px;margin-bottom:20px}.cover .hint{display:none}
+ .ev{grid-template-columns:1fr;gap:24px}
+ .media{height:auto}.stack{flex:none;aspect-ratio:4/3}.dots i.on{width:22px}
+ .ctrl{margin-top:44px}.ctrl button{width:44px;height:44px}
+ .info .kicker{font-size:12px}.badge{font-size:12px}.info h2{font-size:34px;letter-spacing:-1px}.at,.meta{font-size:13px}.desc{font-size:16px}
+ .num{font-size:30px}.lab{font-size:12px}.stat{width:auto}.partners{font-size:16px}.xlink{font-size:14px}.count{font-size:13px}
+ .foot{position:static;margin-top:28px;font-size:12px}
+ #nav{display:none}
+}
+@media (prefers-reduced-motion:reduce){.item,.slide{transition:none}}
+</style>
+</head>
+<body>
+<div id="viewport"><div id="stage"></div></div>
+<div id="nav" aria-label="Slide navigation">
+<button id="prevS" aria-label="Previous slide">←</button><span id="pos"></span><button id="nextS" aria-label="Next slide">→</button>
+</div>
+<script>
+{
+const DATA = {"order": ["cover", "cocktail", "kbw", "flow", "paris", "dubai", "taichung", "round"], "cover": {"kicker": "EVENTS LEAD · APAC & EU", "name": "Winnie Lai", "lede": "GLOBAL SPONSORSHIPS · PARTNERSHIPS · COMMUNITY"}, "events": [{"id": "cocktail", "kicker": "PAST JOB EXPERIENCE: EVENT SHOWCASE #01", "badge": "COMMUNITY SIDE EVENT", "title": "DeFi Cocktail Taipei", "at": "@ Asia Blockchain Summit", "meta": "AUG 7, 2024 · TAIPEI · SIT DOWN BAR", "desc": "A full-house cocktail night for DeFi builders and the Sui community during 2024 Asia Blockchain Summit.", "partners": "Scallop · Sui · DWF Labs", "link": "https://x.com/Scallop_io/status/1822095306722566531", "stats": [["600+", "REGISTRATIONS"], ["200", "CHECKED IN"], ["5K+", "MEDIA ENGAGEMENT"]], "media": [{"type": "img", "src": "media/cocktail_0.jpg", "alt": "DJ at the Scallop booth beside the projected DeFi Cocktail @Taipei screen with Scallop, Sui and DWF Labs logos"}, {"type": "img", "src": "media/cocktail_1.jpg", "alt": "Host speaking on the mic in front of the co-host screen while guests watch"}, {"type": "video", "src": "media/cocktail_v2.mp4", "poster": "media/cocktail_v2.jpg", "alt": "Video of the packed DeFi Cocktail Party room in Taipei, with the co-host screen behind the crowd"}]}, {"id": "kbw", "kicker": "PAST JOB EXPERIENCE: EVENT SHOWCASE #02", "badge": "COMMUNITY SIDE EVENT", "title": "Fried Chicken\n& Beer Night", "at": "@ Korea Blockchain Week", "meta": "SEP 3, 2024 · SEOUL · KYOCHON GANGNAM", "desc": "Culturally-rooted networking with a DJ, Korean drinking games, and a beer show with KOLs.", "partners": "Scallop · Gotbit · $Pucca", "link": "https://x.com/scallop_io/status/1832314498012922066", "stats": [["600+", "REGISTERED"], ["200", "CHECKED IN"], ["6K+", "MEDIA ENGAGEMENT"]], "media": [{"type": "img", "src": "media/kbw_0.jpg", "alt": "Guests networking under the Fried Chicken & Beer Night screen"}, {"type": "img", "src": "media/kbw_1.jpg", "alt": "Guests filming the action on their phones"}, {"type": "img", "src": "media/kbw_2.jpg", "alt": "Host on the mic beside the PUCCA mascot and a beer-game table"}, {"type": "img", "src": "media/kbw_3.jpg", "alt": "Two guests racing in a beer-drinking game as the crowd cheers"}, {"type": "img", "src": "media/kbw_4.jpg", "alt": "Three guests posing for the camera"}, {"type": "img", "src": "media/kbw_5.jpg", "alt": "Guests chatting in the crowd"}]}, {"id": "flow", "kicker": "PAST JOB EXPERIENCE: EVENT SHOWCASE #03", "badge": "COMMUNITY SIDE EVENT", "title": "Taipei DeFi Flow", "at": "@ Taipei Blockchain Week", "meta": "DEC 12, 2024 · TAIPEI · 弎樓", "desc": "Community networking with VCs, projects, foundations and NFT communities in a local Taiwanese restaurant, 弎樓 — Taiwanese culture for the most memorable event experience.", "partners": "Scallop · Sui · Bybit Wallet", "link": "https://x.com/scallop_io/status/1868161550915453298", "stats": [["2,000+", "LUMA REGISTRATIONS"], ["200+", "CHECKED IN"], ["10K+", "MEDIA ENGAGEMENT"]], "media": [{"type": "img", "src": "media/flow_0.jpg", "alt": "Airdrop cards falling down the stairwell"}, {"type": "img", "src": "media/flow_1.jpg", "alt": "Two guests talking on a vintage sofa"}, {"type": "img", "src": "media/flow_2.jpg", "alt": "Guests beside the Taiwan DeFi Flow poster at the entrance"}, {"type": "img", "src": "media/flow_3.jpg", "alt": "Guests posing in the brick courtyard"}, {"type": "img", "src": "media/flow_4.jpg", "alt": "Guests holding up airdrop cards"}, {"type": "img", "src": "media/flow_5.jpg", "alt": "Hosts in qipao at the Sui merch booth"}]}, {"id": "paris", "kicker": "PAST JOB EXPERIENCE: EVENT SHOWCASE #04", "badge": "PRIVATE MEETUP", "title": "Paris DeFi Grow", "at": "@ Paris Blockchain Week", "meta": "APR 9, 2025 · PARIS · BRASSERIE MAISON ROUGE", "desc": "A Scallop × Sui private meetup for the EU community, with a short panel, Kahoot and airdrops over a French buffet.", "partners": "Scallop · Sui", "link": "https://x.com/Scallop_io/status/1909927658458378427", "stats": [["70", "CHECKED IN"], ["5K+", "ENGAGEMENT"]], "media": [{"type": "img", "src": "media/paris_0.jpg", "alt": "Guests networking in the red velvet dining room"}, {"type": "img", "src": "media/paris_1.jpg", "alt": "Small groups talking under the neon ceiling"}, {"type": "img", "src": "media/paris_2.jpg", "alt": "Four guests in Scallop caps"}, {"type": "img", "src": "media/paris_3.jpg", "alt": "Guests mingling between tables"}, {"type": "img", "src": "media/paris_4.jpg", "alt": "Guests in conversation with drinks"}, {"type": "img", "src": "media/paris_5.jpg", "alt": "Scallop caps and Sui keychains laid out as merch"}]}, {"id": "dubai", "kicker": "PAST JOB EXPERIENCE: EVENT SHOWCASE #05", "badge": "BUILDER SIDE EVENT", "title": "Dubai DeFi Grow", "at": "@ Token2049 Dubai", "meta": "APR 29, 2025 · DUBAI · MICHELIN INDIAN RESTAURANT", "desc": "Global VCs, builders and KOLs connect over dinner in a Michelin-rated Indian restaurant.", "partners": "Scallop · Sui Foundation · Credit Scend", "link": "https://x.com/scallop_io/status/1920736932243652960", "stats": [["2,000+", "REGISTERED"], ["300+", "CHECKED IN"], ["10K+", "MEDIAENGAGEMENT"]], "media": [{"type": "img", "src": "media/dubai_0.jpg", "alt": "Dancer performing on a checkerboard floor under neon lights"}, {"type": "img", "src": "media/dubai_1.jpg", "alt": "Three guests under the string lights"}, {"type": "img", "src": "media/dubai_2.jpg", "alt": "Four speakers on stage for the panel"}, {"type": "img", "src": "media/dubai_3.jpg", "alt": "Guests taking a selfie"}, {"type": "img", "src": "media/dubai_4.jpg", "alt": "Guests at the merch mission table"}, {"type": "img", "src": "media/dubai_5.jpg", "alt": "Merch mission signs and Sui giveaways on a table"}]}, {"id": "taichung", "kicker": "PAST JOB EXPERIENCE: EVENT SHOWCASE #06", "badge": "GENERAL MEETUP", "title": "DeFi Meetup\nTaichung", "at": "@ General Meetup", "meta": "MAY 25, 2025 · TAICHUNG, TAIWAN", "desc": "An offline community meetup with Scallop, Sui and Sei builders for R&D conversation and knowledge exchange.", "partners": "Scallop · Sui Foundation", "link": "https://x.com/Scallop_io/status/1926863826579800158?a=3LulXLxX_92rGimTU5s&s=20", "stats": [["50+", "REGISTERED"], ["30+", "CHECKED IN"], ["3K+", "MEDIA ENGAGEMENT"]], "media": [{"type": "img", "src": "media/taichung_0.jpg", "alt": "Group photo of attendees making the Sui hand sign"}, {"type": "img", "src": "media/taichung_1.jpg", "alt": "Attendees listening to a talk"}, {"type": "img", "src": "media/taichung_2.jpg", "alt": "Attendees at a long table during the session"}, {"type": "img", "src": "media/taichung_3.jpg", "alt": "Attendees around a table with pastries and merch"}, {"type": "img", "src": "media/taichung_4.jpg", "alt": "Attendees chatting at a table"}, {"type": "img", "src": "media/taichung_5.jpg", "alt": "Scallop and DeFi Meetup Taichung posters on the wall"}]}, {"id": "round", "kicker": "PAST JOB EXPERIENCE: EVENT SHOWCASE #07", "badge": "COMMUNITY SIDE EVENT", "title": "Taipei DeFi Round", "at": "@ Taipei Blockchain Week", "meta": "SEP 4, 2025 · TAIPEI · HIGH GROUND TAIPEI", "desc": "An evening for Web3 builders and DeFi users, built around a Kahoot competition and Sui Passport stamps.", "partners": "Scallop · Sui · GSR", "link": "https://x.com/Scallop_io/status/1966053817696530672", "stats": [["600+", "REGISTERED"], ["200+", "CHECKED IN"], ["10K+", "MEDIA ENGAGEMENT"]], "media": [{"type": "img", "src": "media/round_0.jpg", "alt": "Taipei DeFi Round branded entrance wall"}, {"type": "img", "src": "media/round_1.jpg", "alt": "Branded stands outside the venue"}, {"type": "img", "src": "media/round_2.jpg", "alt": "Guests arriving at the entrance"}, {"type": "img", "src": "media/round_3.jpg", "alt": "The venue entrance at dusk"}, {"type": "img", "src": "media/round_4.jpg", "alt": "Guests beside the lit sign at night"}, {"type": "img", "src": "media/round_5.jpg", "alt": "The event team posing together"}]}]};
+const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const total = 1 + DATA.events.length;
+const pad = n => String(n).padStart(2,'0');
+const foot = (n, left) => `<div class="foot mono"><span>${left}</span><span>${pad(n)} / ${pad(total)}</span></div>`;
+const numHTML = v => { const m = String(v).match(/^(.*?)([+]?)$/); return esc(m[1]) + (m[2] ? `<span>${m[2]}</span>` : ''); };
+const c = DATA.cover;
+let html = `<section class="slide cover" id="s-cover" data-name="cover">
+<p class="kicker mono">${esc(c.kicker)}</p>
+<h1>${esc(c.name)}<span>.</span></h1>
+<p class="lede">${esc(c.lede)}</p>
+${foot(1,'')}</section>`;
+DATA.events.forEach((e, i) => {
+  const items = e.media.map((m, k) => `<div class="item" data-k="${k}">${m.type === 'video'
+    ? `<video src="${esc(m.src)}" poster="${esc(m.poster)}" muted loop playsinline preload="metadata" aria-label="${esc(m.alt)}"></video><span class="tag mono">VIDEO</span>`
+    : `<img src="${esc(m.src)}" alt="${esc(m.alt)}" loading="${i < 2 ? 'eager' : 'lazy'}">`}</div>`).join('');
+  const stats = e.stats.map(([n, l]) => `<div class="stat"><div class="num">${numHTML(n)}</div><div class="lab mono">${esc(l)}</div></div>`).join('')
+    + (e.partners ? `<div class="stat wide"><div class="lab mono" style="margin:0">PARTNERS</div><div class="partners">${esc(e.partners)}</div></div>` : '');
+  html += `<section class="slide ev" id="s-${esc(e.id)}" data-name="${esc(e.id)}">
+<div class="media">
+<div class="stack" tabindex="0" aria-label="Photos of ${esc(e.title.replace(/\n/g,' '))}: scroll or use the up and down arrow keys">${items}</div>
+<div class="ctrl"><button class="up" aria-label="Previous photo">↑</button><button class="down" aria-label="Next photo">↓</button><div class="dots">${e.media.map(() => '<i></i>').join('')}</div><span class="count mono"></span></div>
+</div>
+<div class="info">
+<p class="kicker mono">${esc(e.kicker)}</p>
+<span class="badge mono">${esc(e.badge)}</span>
+<h2>${esc(e.title)}</h2>
+<p class="at mono">${esc(e.at)}</p>
+<p class="meta mono">${esc(e.meta)}</p>
+<p class="desc">${esc(e.desc)}</p>
+<div class="stats">${stats}</div>
+${e.link ? `<a class="xlink mono" href="${esc(e.link)}" target="_blank" rel="noopener">View on X →</a>` : ''}
+</div>
+${foot(i + 2, 'WINNIE LAI<b>.</b>')}</section>`;
+});
+const stage = document.getElementById('stage');
+stage.innerHTML = html;
+
+// fit the 1920x1080 stage to the window
+const fit = () => { const s = Math.min((innerWidth - 24) / 1920, (innerHeight - 84) / 1080); stage.style.transform = innerWidth > 760 ? `translate(-50%,-50%) scale(${s})` : 'none'; };
+addEventListener('resize', fit); fit();
+
+// photo stacks
+const stacks = [...document.querySelectorAll('.ev')].map(sec => {
+  const items = [...sec.querySelectorAll('.item')], dots = [...sec.querySelectorAll('.dots i')], count = sec.querySelector('.count');
+  const st = { sec, i: 0, n: items.length, items };
+  st.show = j => {
+    st.i = (j + st.n) % st.n;
+    items.forEach((el, k) => {
+      el.className = 'item ' + (k === st.i ? 'cur' : k === (st.i + 1) % st.n && st.n > 1 ? 'next' : k === (st.i - 1 + st.n) % st.n ? 'prev' : 'hide');
+      const v = el.querySelector('video');
+      if (v) { if (k === st.i && sec.classList.contains('on')) { v.play().catch(() => {}); } else { v.pause(); } }
+    });
+    dots.forEach((d, k) => d.classList.toggle('on', k === st.i));
+    count.textContent = `SCROLL · ${st.i + 1} / ${st.n}`;
+  };
+  sec.querySelector('.up').onclick = () => st.show(st.i - 1);
+  sec.querySelector('.down').onclick = () => st.show(st.i + 1);
+  let lock = 0;
+  sec.querySelector('.stack').addEventListener('wheel', ev => {
+    ev.preventDefault();
+    const now = Date.now(); if (now < lock || Math.abs(ev.deltaY) < 4) return;
+    lock = now + 650; st.show(st.i + (ev.deltaY > 0 ? 1 : -1));
+  }, { passive: false });
+  let y0 = null; const sk = sec.querySelector('.stack');
+  sk.addEventListener('touchstart', ev => { y0 = ev.touches[0].clientX; }, { passive: true });
+  sk.addEventListener('touchend', ev => { if (y0 === null) return; const dx = ev.changedTouches[0].clientX - y0; if (Math.abs(dx) > 40) st.show(st.i + (dx < 0 ? 1 : -1)); y0 = null; });
+  sk.addEventListener('keydown', ev => { if (ev.key === 'ArrowDown') { st.show(st.i + 1); ev.preventDefault(); ev.stopPropagation(); } if (ev.key === 'ArrowUp') { st.show(st.i - 1); ev.preventDefault(); ev.stopPropagation(); } });
+  st.show(0);
+  return st;
+});
+
+// slides
+const slides = [...document.querySelectorAll('.slide')];
+const pos = document.getElementById('pos');
+let cur = 0;
+const go = j => {
+  cur = Math.max(0, Math.min(slides.length - 1, j));
+  slides.forEach((s, k) => s.classList.toggle('on', k === cur));
+  pos.textContent = `${cur + 1} / ${slides.length}`;
+  stacks.forEach(st => st.show(st.i));
+  const name = slides[cur].dataset.name;
+  if (location.hash !== '#' + name) history.replaceState(null, '', '#' + name);
+};
+document.getElementById('prevS').onclick = () => go(cur - 1);
+document.getElementById('nextS').onclick = () => go(cur + 1);
+addEventListener('keydown', ev => {
+  if (ev.key === 'ArrowRight' || ev.key === 'PageDown' || ev.key === ' ') { go(cur + 1); ev.preventDefault(); }
+  if (ev.key === 'ArrowLeft' || ev.key === 'PageUp') { go(cur - 1); ev.preventDefault(); }
+  const st = stacks.find(s => s.sec === slides[cur]);
+  if (st && ev.key === 'ArrowDown') { st.show(st.i + 1); ev.preventDefault(); }
+  if (st && ev.key === 'ArrowUp') { st.show(st.i - 1); ev.preventDefault(); }
+});
+const fromHash = () => { const h = location.hash.slice(1); const k = slides.findIndex(s => s.dataset.name === h); go(k >= 0 ? k : 0); };
+addEventListener('hashchange', fromHash);
+fromHash();
+if (innerWidth <= 760) slides.forEach(s => s.classList.add('on'));
+}
+</script>
+</body>
+</html>
